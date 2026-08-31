@@ -22,6 +22,10 @@
 
 `.mp3` `.flac` `.wav` `.m4a` `.aac` `.ogg` `.oga` `.opus` `.wma` `.ape`
 
+普通音频之间**任意两两互转**（如 `wav→mp3→wav`、`mp3→flac`、`ogg→m4a`、多跳链
+`wav→mp3→flac→ogg→m4a→wav`），歌名/歌手/专辑/封面随每一跳自动保留；
+由 selftest「普通音频互转矩阵」逐跳校验。
+
 ### 输出格式
 
 `mp3`（默认，码率可调默认 320k）/ `flac` / `wav` / `aac` / `ogg` / `m4a` /

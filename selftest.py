@@ -15,6 +15,8 @@ selftest.py —— 自检脚本：对解密器与转换管线做端到端验证
   5. KGM/KWM/XM/MG3D/TM 构造-解密往返测试（用各格式加密逆运算构造样本）
   6. NCM 真实文件回归（E:\\ncmturnmp3 下的样本 → mp3，ffprobe 校验时长与标签）
   7. 普通音频转换管线（ffmpeg 合成样本 → 各输出格式 + 标签存活校验）
+  8. 普通音频互转矩阵（wav→X→wav 往返 / mp3·flac·ogg·m4a 两两互转 / 五跳链，
+     每跳校验标签与封面字节级存活）
 
 用法：
   python selftest.py            # 全部测试（含 4.25GB mask 校验，约 1~3 分钟）
@@ -24,6 +26,7 @@ selftest.py —— 自检脚本：对解密器与转换管线做端到端验证
 退出码 0 = 全部通过。
 """
 import argparse
+import base64
 import hashlib
 import io
 import os
@@ -495,6 +498,93 @@ def test_conversion_pipeline():
               audio_core.collect_ncm_files([src]) == [])
 
 
+def test_interconversion_matrix():
+    section("普通音频互转矩阵（wav→X→wav 往返 / X↔Y 两两互转 / 多跳链 + 标签封面存活）")
+    if not audio_core.check_ffmpeg():
+        check("跳过（无 ffmpeg）", False)
+        return
+    with tempfile.TemporaryDirectory() as td:
+        # 合成 1 秒 wav + ID3 标签 + 1x1 PNG 封面（字节级存活比对）
+        src = os.path.join(td, "矩阵歌手 - 矩阵歌曲.wav")
+        subprocess.run(
+            [audio_core._ffmpeg_exe(), "-y", "-f", "lavfi", "-i",
+             "sine=frequency=440:duration=1", "-ac", "1", src],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        cover_png = base64.b64decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAE"
+            "hQGAhKmMIQAAAABJRU5ErkJggg==")
+        audio_core.write_tags(src, "wav",
+                              {"title": "矩阵歌曲", "artist": "矩阵歌手", "album": "矩阵专辑"},
+                              cover_png)
+
+        def read_meta(path):
+            """与 audio_core._read_tags_from_file 同构的原始标签读取（不经 easy）。"""
+            import mutagen
+            from mutagen import id3 as _id3, mp4 as _mp4
+            m = mutagen.File(path)
+            if m is None or m.tags is None:
+                return "", "", None
+            tags = m.tags
+            if isinstance(tags, _id3.ID3):
+                def t(key):
+                    frame = tags.get(key)
+                    return str(frame.text[0]) if frame is not None and frame.text else ""
+                return t("TIT2"), t("TPE1"), audio_core._extract_cover(path)
+            if isinstance(tags, _mp4.MP4Tags):
+                return (str((tags.get("\xa9nam") or [""])[0]),
+                        str((tags.get("\xa9ART") or [""])[0]),
+                        audio_core._extract_cover(path))
+            return (str((tags.get("title") or [""])[0]),
+                    str((tags.get("artist") or [""])[0]),
+                    audio_core._extract_cover(path))
+
+        def hop(src_path, fmt, out_sub):
+            """一次转换 + 产物格式/标签/封面校验；失败返回 (None, 原因)。"""
+            out_dir = os.path.join(td, out_sub)
+            ok, msg = audio_core.process_one(src_path, out_dir, fmt, "192k")
+            if not ok:
+                return None, msg
+            out = os.path.join(out_dir,
+                               os.path.splitext(os.path.basename(src_path))[0] + "." + fmt)
+            if not _audio_ok(out):
+                return None, "mutagen 校验失败"
+            title, artist, cov = read_meta(out)
+            if "矩阵歌曲" not in title or "矩阵歌手" not in artist:
+                return None, "标签丢失 title=%r artist=%r" % (title, artist)
+            if cov != cover_png:
+                return None, "封面丢失/变化"
+            return out, None
+
+        fmt4 = ("mp3", "flac", "ogg", "m4a")
+
+        # wav → 各格式 → 回 wav（两跳往返）
+        for f in fmt4:
+            mid, err1 = hop(src, f, "rt1_" + f)
+            back, err2 = (hop(mid, "wav", "rt2_" + f) if mid else (None, ""))
+            check("wav→%s→wav 往返" % f, back is not None, err1 or err2)
+
+        # mp3/flac/ogg/m4a 两两互转（12 条）
+        stage1 = {}
+        for f in fmt4:
+            mid, err = hop(src, f, "m1_" + f)
+            stage1[f] = mid
+            check("wav→%s" % f, mid is not None, err)
+        for a in fmt4:
+            for b in fmt4:
+                if a == b:
+                    continue
+                out, err = hop(stage1[a], b, "mx_%s_%s" % (a, b))
+                check("%s→%s 互转" % (a, b), out is not None, err)
+
+        # 多跳链 wav→mp3→flac→ogg→m4a→wav（每跳标签/封面都必须存活）
+        chain, chain_err = src, ""
+        for f in fmt4 + ("wav",):
+            chain, chain_err = hop(chain, f, "chain")
+            if chain is None:
+                break
+        check("五跳链 wav→mp3→flac→ogg→m4a→wav", chain is not None, chain_err)
+
+
 def main():
     parser = argparse.ArgumentParser(description="ncmturnmp3 自检")
     parser.add_argument("--quick", action="store_true", help="跳过 4.25GB mask 校验")
@@ -517,6 +607,7 @@ def main():
     else:
         test_ncm_regression()
         test_conversion_pipeline()
+        test_interconversion_matrix()
 
     print("\n================ 结果 ================")
     print("通过: %d    失败: %d" % (_PASS, _FAIL))

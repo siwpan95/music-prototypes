@@ -146,15 +146,44 @@ def _read_tags_from_bytes(audio_bytes, fmt):
         return _read_tags_from_file(probe)
 
 
-def _read_tags_from_file(path):
-    """用 mutagen 读取音频文件标签，返回 dict(title/artist/album/cover) 或 None。"""
+def _first_text(val):
+    """标签取值容错：兼容 VComment 列表 / ID3 帧 text / MP4 单值等形态。"""
+    if val is None:
+        return ""
+    if isinstance(val, (list, tuple)):
+        val = val[0] if val else ""
     try:
-        easy = mutagen.File(path, easy=True)
-        if easy is None or easy.tags is None:
+        return str(val)
+    except Exception:
+        return ""
+
+
+def _read_tags_from_file(path):
+    """用 mutagen 读取音频文件标签，返回 dict(title/artist/album/cover) 或 None。
+
+    不用 easy=True 包装：mutagen 对 WAVE 没有 Easy 类（easy.get("title") 在
+    原始 ID3 上取不到值，wav 源标签会全部丢失）。改为按原始标签类分发读取。
+    """
+    try:
+        audio = mutagen.File(path)
+        if audio is None or audio.tags is None:
             return None
-        title = str(easy.get("title", [""])[0] or "")
-        artist = str(easy.get("artist", [""])[0] or "")
-        album = str(easy.get("album", [""])[0] or "")
+        tags = audio.tags
+        if isinstance(tags, id3.ID3):  # mp3 / wav(_WaveID3) / aiff
+            def frame_text(key):
+                frame = tags.get(key)
+                return _first_text(getattr(frame, "text", None))
+            title = frame_text("TIT2")
+            artist = frame_text("TPE1")
+            album = frame_text("TALB")
+        elif isinstance(tags, mp4.MP4Tags):  # m4a
+            title = _first_text(tags.get("\xa9nam"))
+            artist = _first_text(tags.get("\xa9ART"))
+            album = _first_text(tags.get("\xa9alb"))
+        else:  # VorbisComment（flac/ogg/opus）等，键名即 title/artist/album
+            title = _first_text(tags.get("title") or tags.get("Title"))
+            artist = _first_text(tags.get("artist") or tags.get("Author"))
+            album = _first_text(tags.get("album") or tags.get("WM/AlbumTitle"))
         cover = _extract_cover(path)
         if not (title or artist or album or cover):
             return None
@@ -164,22 +193,35 @@ def _read_tags_from_file(path):
 
 
 def _extract_cover(path):
-    """从音频文件提取封面字节（ID3/FLAC/OGG/MP4）。"""
+    """从音频文件提取封面字节（ID3/FLAC/OGG/MP4）。
+
+    严格按标签类分发：ID3.getall 只存在于 ID3 系（mp3/wav），
+    VComment/MP4Tags 没有 getall——混用会抛 AttributeError 导致封面丢失。
+    """
     try:
         raw = mutagen.File(path)
-        if raw is None:
+        if raw is None or raw.tags is None:
             return None
-        # ID3（mp3/wav）
-        if raw.tags is not None:
-            for frame in raw.tags.getall("APIC"):
+        tags = raw.tags
+        # ID3（mp3/wav/aiff）
+        if isinstance(tags, id3.ID3):
+            for frame in tags.getall("APIC"):
                 return bytes(frame.data)
-        # FLAC / OGG
+            return None
+        # MP4（m4a）
+        if isinstance(tags, mp4.MP4Tags) and "covr" in tags:
+            return bytes(tags["covr"][0])
+        # FLAC：内嵌 Picture 块
         pics = getattr(raw, "pictures", None)
         if pics:
             return bytes(pics[0].data)
-        # MP4
-        if isinstance(raw.tags, mp4.MP4Tags) and "covr" in raw.tags:
-            return bytes(raw.tags["covr"][0])
+        # OGG / Opus：METADATA_BLOCK_PICTURE（VorbisComment 内嵌 base64，
+        # 严格实现可能省略 padding 补 '='）
+        mbp = tags.get("metadata_block_picture")
+        if mbp:
+            data = mbp[0]
+            pic = _flac_mod.Picture(base64.b64decode(data + "=" * (-len(data) % 4)))
+            return pic.data
     except Exception:
         pass
     return None
