@@ -55,11 +55,37 @@ FILE_DIALOG_PATTERNS = [
 ]
 
 
+def _ffmpeg_exe():
+    """三级自动发现 ffmpeg 可执行文件路径；找不到返回 None。
+
+    ① 环境变量 NCMTURNMP3_FFMPEG / 显式配置 → ② 系统 PATH → ③ imageio-ffmpeg
+    pip 包自带二进制（安装 imageio-ffmpeg 后开箱即用，无需手动装 ffmpeg）。
+    """
+    env = os.environ.get("NCMTURNMP3_FFMPEG")
+    if env and os.path.isfile(env):
+        return env
+    import shutil
+    path_hit = shutil.which("ffmpeg")
+    if path_hit:
+        return path_hit
+    try:
+        import imageio_ffmpeg
+        exe = imageio_ffmpeg.get_ffmpeg_exe()
+        if exe and os.path.isfile(exe):
+            return exe
+    except Exception:
+        pass
+    return None
+
+
 def check_ffmpeg():
-    """检查系统是否安装了 ffmpeg。"""
+    """检查是否有可用的 ffmpeg（PATH 或 imageio-ffmpeg 自带二进制）。"""
+    exe = _ffmpeg_exe()
+    if not exe:
+        return False
     try:
         subprocess.run(
-            ["ffmpeg", "-version"],
+            [exe, "-version"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=True,
@@ -299,8 +325,13 @@ def _meta_from_filename(base):
 # ffmpeg 转码
 # --------------------------------------------------------------------------- #
 def _run_ffmpeg(src, dst, fmt_key, bitrate):
+    exe = _ffmpeg_exe()
+    if not exe:
+        raise RuntimeError(
+            "未找到 ffmpeg：请安装 imageio-ffmpeg（pip install imageio-ffmpeg）、"
+            "或安装 ffmpeg 并加入 PATH、或设置环境变量 NCMTURNMP3_FFMPEG 指向 ffmpeg.exe")
     spec = OUTPUT_FORMATS[fmt_key]
-    cmd = ["ffmpeg", "-i", src, "-y", "-vn"]
+    cmd = [exe, "-i", src, "-y", "-vn"]
     cmd += spec["codec"]
     if spec["bitrate"] and bitrate:
         cmd += ["-ab", bitrate]

@@ -41,7 +41,7 @@ def main():
         sys.exit(1)
 
     if args.output_format != "orig" and not audio_core.check_ffmpeg():
-        print("未检测到 ffmpeg，请先安装并添加到 PATH（或使用 -f orig 仅解密）", file=sys.stderr)
+        print("未检测到 ffmpeg：请 pip install imageio-ffmpeg（推荐，免配置）、或安装 ffmpeg 加入 PATH、或设环境变量 NCMTURNMP3_FFMPEG（也可用 -f orig 仅解密）", file=sys.stderr)
         sys.exit(1)
 
     files = audio_core.collect_files(args.input)

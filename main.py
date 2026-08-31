@@ -208,7 +208,7 @@ class ConverterApp:
         self.bitrate_entry.config(state=state)
         if not self.ffmpeg_ok and fmt != "orig":
             self.log("⚠ 未检测到 ffmpeg：仅“orig（原始格式·仅解密）”模式可用，"
-                     "其余输出格式需安装 ffmpeg 并加入 PATH。")
+                     "其余输出格式需安装 imageio-ffmpeg（pip 一键）或 ffmpeg 加入 PATH。")
 
     def log(self, msg):
         self.log_area.configure(state=tk.NORMAL)
@@ -289,7 +289,7 @@ class ConverterApp:
         if out_fmt not in audio_core.OUTPUT_FORMATS:
             out_fmt = audio_core.DEFAULT_OUTPUT_FORMAT
         if out_fmt != "orig" and not self.ffmpeg_ok:
-            messagebox.showerror("错误", "未检测到 ffmpeg，无法转码。请安装 ffmpeg 并加入 "
+            messagebox.showerror("错误", "未检测到 ffmpeg，无法转码。请安装 imageio-ffmpeg 或 ffmpeg 并加入 "
                                           "PATH，或选择 orig（原始格式·仅解密）模式。")
             return
 
@@ -334,7 +334,7 @@ class ConverterApp:
 def cli_batch(input_paths, out_dir=None, output_format="mp3", bitrate="320k", jobs=4):
     """命令行批量转换模式（复用 audio_core）。支持多个输入路径与并发。"""
     if output_format != "orig" and not audio_core.check_ffmpeg():
-        print("未检测到 ffmpeg，请先安装并添加到环境变量 PATH（或使用 -f orig 仅解密）",
+        print("未检测到 ffmpeg：请 pip install imageio-ffmpeg（推荐）、或安装 ffmpeg 加入 PATH、或设环境变量 NCMTURNMP3_FFMPEG（也可用 -f orig 仅解密）",
               file=sys.stderr)
         return 1
 

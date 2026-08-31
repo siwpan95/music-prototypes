@@ -51,8 +51,7 @@ from crypto_tables import (  # noqa: E402
 )
 
 TESTDATA_DIR = os.path.join(HERE, "tests", "testdata")
-FFPROBE = "ffprobe"
-FFMPEG = "ffmpeg"
+FFMPEG = "ffmpeg"   # 仅作占位：实际执行统一走 audio_core._ffmpeg_exe() 自动发现
 
 # unlock-music/cli 项目发布的 mask 文件权威 SHA256（@jixun/kugou-crypto README）
 KGM_MASK_V2_SHA256 = "d4903d367b158f4f9287c6bd5dedca9893fa1da6643e372c2ea45d18e50fba00"
@@ -85,12 +84,8 @@ def load(name):
 
 
 def have_ffprobe():
-    try:
-        subprocess.run([FFPROBE, "-version"], stdout=subprocess.DEVNULL,
-                       stderr=subprocess.DEVNULL, check=True)
-        return True
-    except Exception:
-        return False
+    """已弃用：改用 mutagen 校验（见 _audio_ok），ffprobe 不再必需。"""
+    return False
 
 
 # --------------------------------------------------------------------------- #
@@ -101,7 +96,8 @@ def test_env():
     check("numpy 向量化路径", decryptors._HAS_NUMPY or True,
           "" if decryptors._HAS_NUMPY else "（未装 numpy，走纯 Python 回退路径）")
     check("ffmpeg", audio_core.check_ffmpeg())
-    check("ffprobe", have_ffprobe())
+    check("ffmpeg 自动发现（PATH / imageio-ffmpeg / 环境变量）",
+          bool(audio_core._ffmpeg_exe()))
 
 
 # --------------------------------------------------------------------------- #
@@ -384,26 +380,27 @@ def test_roundtrip():
 
 
 # --------------------------------------------------------------------------- #
-def _ffprobe_ok(path, expect_codec=None, min_duration=0.1):
-    if not have_ffprobe():
-        return False
+#: 期望 codec（ffmpeg 参数名）→ mutagen 类型名（时长/格式校验用；aac ADTS 无标签容器）
+_MUTAGEN_TYPE_HINTS = {
+    "mp3": "MP3", "flac": "FLAC", "wav": "WAVE", "pcm_s16le": "WAVE",
+    "ogg": "OggVorbis", "vorbis": "OggVorbis", "m4a": "MP4", "aac": None,
+}
+
+
+def _audio_ok(path, expect_codec=None, min_duration=0.1):
+    """用 mutagen 校验产物（替代原 ffprobe 依赖，ffprobe 不随 imageio-ffmpeg 分发）。"""
     try:
-        res = subprocess.run(
-            [FFPROBE, "-v", "error", "-show_entries",
-             "format=duration,format_name", "-show_entries", "stream=codec_name",
-             "-of", "json", path],
-            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True)
-        import json as _json
-        info = _json.loads(res.stdout.decode("utf-8"))
-        dur = float(info.get("format", {}).get("duration", 0) or 0)
-        codec = ""
-        for st in info.get("streams", []):
-            codec = st.get("codec_name", "")
-            break
+        import mutagen
+        m = mutagen.File(path)
+        if m is None:
+            return False
+        dur = float(getattr(m.info, "length", 0) or 0)
         if dur < min_duration:
             return False
-        if expect_codec and codec != expect_codec:
-            return False
+        if expect_codec:
+            hint = _MUTAGEN_TYPE_HINTS.get(expect_codec)
+            if hint and type(m).__name__ != hint:
+                return False
         return True
     except Exception:
         return False
@@ -420,7 +417,7 @@ def test_ncm_regression():
         out = os.path.join(td, "五条人 - 城市找猪.mp3")
         check("process_one 成功", ok, msg)
         check("输出存在", os.path.exists(out))
-        check("ffprobe 校验（mp3/时长）", _ffprobe_ok(out, expect_codec="mp3"))
+        check("mutagen 校验（mp3/时长）", _audio_ok(out, expect_codec="mp3"))
         # 标签校验
         import mutagen
         m = mutagen.File(out, easy=True)
@@ -442,14 +439,14 @@ def test_ncm_regression():
 
 def test_conversion_pipeline():
     section("普通音频转换管线（合成样本 → 各输出格式 + 标签）")
-    if not audio_core.check_ffmpeg() or not have_ffprobe():
-        check("跳过（无 ffmpeg/ffprobe）", False)
+    if not audio_core.check_ffmpeg():
+        check("跳过（无 ffmpeg）", False)
         return
     with tempfile.TemporaryDirectory() as td:
         # 合成一段 3 秒 flac 测试音频
         src = os.path.join(td, "测试歌手 - 测试歌曲.flac")
         subprocess.run(
-            [FFMPEG, "-y", "-f", "lavfi", "-i",
+            [audio_core._ffmpeg_exe(), "-y", "-f", "lavfi", "-i",
              "sine=frequency=440:duration=3", "-c:a", "flac", src],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
         # 打上标签
@@ -464,7 +461,7 @@ def test_conversion_pipeline():
             ok, msg = audio_core.process_one(src, out_dir, fmt, "192k")
             out = os.path.join(out_dir, "测试歌手 - 测试歌曲." + out_ext)
             check("→ %s 转换成功" % fmt, ok and os.path.exists(out), msg)
-            check("→ %s ffprobe 校验" % fmt, _ffprobe_ok(out, expect_codec=codec))
+            check("→ %s mutagen 校验" % fmt, _audio_ok(out, expect_codec=codec))
             # 标签存活校验（aac ADTS 无标签容器；各格式标签键不同）
             if fmt != "aac":
                 import mutagen

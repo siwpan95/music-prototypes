@@ -91,10 +91,15 @@ ref/             生成 crypto_tables.py 时的参考源码快照（不参与运
 - Python 3.8+（本机验证于 3.14）
 - `pycryptodome`、`mutagen`（必需）；`numpy`（强烈推荐，大文件解密提速 1~2 个数量级，
   缺失时自动回退纯 Python 实现）
-- ffmpeg 加入 PATH（仅 `orig` 之外的重编码需要；`-f orig` 模式可不装）
+- **转码引擎（通用格式互转）自动发现，三级查找，无需手动配置**：
+  1. 环境变量 `NCMTURNMP3_FFMPEG` 指向 ffmpeg.exe（显式指定）
+  2. 系统 PATH 中的 ffmpeg
+  3. `imageio-ffmpeg` pip 包自带二进制（**推荐**：`pip install imageio-ffmpeg` 即开箱可用）
+  - `-f orig`（仅解密不转码）模式完全不需要 ffmpeg。
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt          # 必装依赖
+pip install imageio-ffmpeg               # 推荐：免配置启用所有格式互转
 ```
 
 ## 验证
@@ -112,7 +117,8 @@ python selftest.py --quick    # 快速自检
 - KGM numpy 向量化实现与纯 Python 参考实现逐字节一致（含跨周期大偏移）
 - KGM/VPR/KWM/XM/MG3D/TM 构造-解密往返（含纯 Python 回退路径）
 - NCM 真实文件回归（ffprobe 时长校验 + ID3 标签/封面校验）
-- 普通音频 → 全部输出格式转换 + 标签存活 + 同格式直写字节级一致
+- 普通音频 → 全部输出格式转换 + 标签存活 + 同格式直写字节级一致（mutagen 校验时长/格式，
+  不依赖 ffprobe）
 
 ## 算法出处与说明
 
