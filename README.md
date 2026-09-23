@@ -1,5 +1,8 @@
 # ncmturnmp3 —— 加密音乐多格式转换器
 
+> 仓库：<https://gitee.com/siwpan/ncmturnmp3> ｜ 许可：MIT（见 [LICENSE](LICENSE)）
+> 注：文中 <PATH> 为路径占位符，请替换为你本机实际的目录 / 可执行文件路径。
+
 把国内主流音乐平台下载的加密音频解密并转换为通用格式，纯本地运行、不联网、
 不依赖任何第三方服务。GUI（tkinter）与命令行共用同一套核心逻辑。
 
@@ -56,13 +59,13 @@ python main.py
 
 ```bash
 # 批量转换（mp3 320k）
-python main.py D:\Music -o D:\Out
+python main.py <PATH> -o <PATH>
 
 # 转成 flac
 python ncm_batch.py "歌曲.mflac" -f flac
 
 # 仅解密不转码（无需安装 ffmpeg）
-python main.py D:\Music -f orig
+python main.py <PATH> -f orig
 
 # 交互式
 python main.py -i
