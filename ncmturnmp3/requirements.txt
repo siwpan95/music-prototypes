@@ -1,0 +1,6 @@
+# ncmturnmp3 dependencies
+mutagen
+numpy
+pycryptodome
+# 可选但强烈推荐：自带 ffmpeg 二进制（通用格式互转无需手动安装 ffmpeg）
+imageio-ffmpeg
