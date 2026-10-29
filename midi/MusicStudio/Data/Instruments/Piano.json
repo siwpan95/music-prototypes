@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "instrument_name": "Piano",
+    "program": 0,
+    "channel": 0,
+    "is_drum": false,
+    "creation_time": "",
+    "version": "2.0"
+  },
+  "parameters": {
+    "volume": 100,
+    "pan": 64
+  },
+  "notes": [
+    {
+      "pitch": 79,
+      "velocity": 74,
+      "start": 0.0,
+      "duration": 0.607134842687795
+    },
+    {
+      "pitch": 81,
+      "velocity": 78,
+      "start": 0.5,
+      "duration": 0.5152348150716849
+    },
+    {
+      "pitch": 83,
+      "velocity": 81,
+      "start": 1.0,
+      "duration": 0.7426480052069411
+    },
+    {
+      "pitch": 81,
+      "velocity": 74,
+      "start": 1.5,
+      "duration": 0.6551093973345993
+    },
+    {
+      "pitch": 84,
+      "velocity": 76,
+      "start": 2.0,
+      "duration": 0.582364921109551
+    },
+    {
+      "pitch": 74,
+      "velocity": 87,
+      "start": 2.5,
+      "duration": 0.6357747387156935
+    },
+    {
+      "pitch": 81,
+      "velocity": 91,
+      "start": 3.0,
+      "duration": 0.7275721932132385
+    },
+    {
+      "pitch": 77,
+      "velocity": 95,
+      "start": 3.5,
+      "duration": 0.7050862335553715
+    }
+  ]
+}

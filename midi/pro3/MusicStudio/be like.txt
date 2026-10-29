@@ -1,0 +1,52 @@
+MusicStudio/                 # 主目录
+├── MusicStudio.bat         # 主控制程序
+├── 00_Setup/               # 安装脚本
+├── 01_ParamGen/            # 参数生成模块
+├── 02_MIDIGen/             # MIDI生成模块
+├── 03_AudioMix/            # 音频混合模块
+├── Tools/                  # 工具集
+├── Config/                 # 配置文件
+├── Data/                   # 用户数据
+├── Output/                 # 输出目录
+├── Libs/                   # 库文件
+├── Logs/                   # 日志文件
+└── Docs/                   # 文档
+
+
+
+
+:: 1. 生成乐器配置
+01_ParamGen\ParamGen.bat
+:: 选择1-创建新配置，填写信息
+
+:: 2. 生成MIDI
+02_MIDIGen\MIDIGen.bat
+:: 选择配置文件，设置参数
+
+:: 3. 合成音频
+03_AudioMix\AudioMix.bat
+:: 选择1-从MIDI生成音频
+
+
+
+
+
+
+
+:: 1. 将人声音频放入 Data\Audio\
+copy "C:\MyVocal.wav" "Data\Audio\"
+
+:: 2. 运行人声处理器
+Tools\ProcessVocal.bat
+
+
+
+
+
+
+:: 1. 准备音频文件
+mkdir "BatchInput"
+copy "*.wav" "BatchInput\"
+
+:: 2. 运行批量处理器
+Tools\BatchProcess.bat

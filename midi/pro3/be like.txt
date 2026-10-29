@@ -1,0 +1,48 @@
+MusicStudio/
+│
+├── 00_Setup/                    # 安装和配置
+│   ├── Install.bat             # 主安装脚本
+│   ├── Install.ps1             # PowerShell安装脚本
+│   ├── OfflinePackages/         # 离线安装包
+│   └── Requirements/           # 依赖包
+│
+├── 01_ParamGen/                # 参数生成
+│   ├── ParamGen.bat           # 批处理接口
+│   ├── ParamGen.ps1           # PowerShell实现
+│   ├── ParamGen.py            # Python简化版
+│   └── Templates/             # 模板文件
+│
+├── 02_MIDIGen/                 # MIDI生成
+│   ├── MIDIGen.bat
+│   ├── MIDIGen.ps1
+│   └── MIDIGen.py
+│
+├── 03_AudioMix/                # 音频混合
+│   ├── AudioMix.bat
+│   ├── AudioMix.ps1
+│   └── AudioMix.py
+│
+├── Tools/                      # 工具脚本
+│   ├── ConvertMIDI.bat        # MIDI转换工具
+│   ├── ProcessVocal.bat       # 人声处理工具
+│   ├── SamplerTool.bat        # 采样工具
+│   └── BatchProcess.bat       # 批量处理工具
+│
+├── Config/                     # 配置文件
+│   ├── Defaults.ini
+│   ├── Keys.txt               # 快捷键映射
+│   └── Colors.txt             # 颜色配置
+│
+├── Data/                       # 数据文件
+│   ├── Instruments/           # 乐器配置
+│   ├── MIDI/                  # MIDI文件
+│   └── Audio/                 # 音频文件
+│
+├── Output/                     # 输出目录
+│   ├── Projects/              # 项目文件
+│   ├── Renders/               # 渲染输出
+│   └── Exports/               # 导出文件
+│
+└── Libs/                       # 依赖库
+    ├── SoundFonts/            # 音色库
+    └── Samples/               # 采样库

@@ -1,0 +1,10 @@
+# 核心库
+pretty_midi
+soundfile
+numpy
+scipy
+librosa  # 高级音频处理
+
+# 可选：GUI界面
+pygame-ce
+# tkinter（Python 标准库，无需安装）

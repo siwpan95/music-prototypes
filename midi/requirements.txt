@@ -1,0 +1,24 @@
+# midi dependencies (auto-generated 2026-08-20)
+audio_engine
+# compile_decompile（项目内模块，非 pip 包）
+fastapi
+librosa
+matplotlib
+numpy
+pretty_midi
+# pyaudio（已移至 G:\notpython\pyaudio-simpleaudio：缺 PortAudio 编译环境、无 3.14 轮子；音频改用 sounddevice）
+pyfluidsynth
+pygame_gui
+pygame-ce
+PyYAML
+# sampler_system（项目内模块，非 pip 包）
+scipy
+setuptools
+# simpleaudio（同上，已移至 G:\notpython\pyaudio-simpleaudio）
+sounddevice
+soundfile
+tqdm
+uvicorn
+# vocal_coupling（项目内模块，非 pip 包）
+# vst3（项目内模块，非 pip 包）
+# local deps (sibling projects, not pip): PyInstaller

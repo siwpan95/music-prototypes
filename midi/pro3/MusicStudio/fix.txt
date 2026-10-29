@@ -1,0 +1,13 @@
+:: 重新安装Python包
+pip uninstall -y numpy pygame pretty_midi soundfile
+pip install numpy pygame pretty_midi soundfile
+
+:: 检查默认音频设备
+python -c "import pygame; pygame.mixer.init(); print(pygame.mixer.get_init())"
+
+:: 检查MIDI设备
+python -c "import pygame; pygame.mixer.init(); pygame.mixer.music.load('test.mid'); pygame.mixer.music.play()"
+
+:: 使用完整路径
+set ABSOLUTE_PATH=%~dp0
+cd /d "%ABSOLUTE_PATH%"

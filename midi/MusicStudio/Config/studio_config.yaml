@@ -1,0 +1,44 @@
+# MusicStudio Configuration
+# 情绪映射 (Pro1 + Pro4 合并)
+# 乐器预设 (Pro2 合并)
+# 部署配置 (Pro3 合并)
+
+project:
+  name: MusicStudio v4.0
+  version: "4.0"
+  description: "四合一音乐制作系统 - Pro1智能配器 + Pro2 DAW界面 + Pro3部署体系 + Pro4引擎"
+
+defaults:
+  mood: happy
+  bpm: 120
+  key: C
+  complexity: 3
+  bars: 4
+  sample_rate: 44100
+
+paths:
+  data_instruments: Data/Instruments
+  data_midi: Data/MIDI
+  data_audio: Data/Audio
+  output_exports: Output/Exports
+  output_renders: Output/Renders
+  output_projects: Output/Projects
+  output_stems: Output/Stems
+  soundfonts: SoundFonts
+  logs: Logs
+
+effects:
+  master_chain:
+    - type: eq
+      low_gain: 1.05
+      mid_gain: 1.0
+      high_gain: 0.98
+    - type: compressor
+      threshold: 0.6
+      ratio: 3.0
+    - type: reverb
+      amount: 0.25
+
+synthesis:
+  engine: auto     # fluidsynth / soft_synth / auto
+  quality: medium   # low / medium / high

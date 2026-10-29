@@ -1,0 +1,184 @@
+{
+  "metadata": {
+    "instrument_name": "Drums",
+    "program": 0,
+    "channel": 9,
+    "is_drum": true,
+    "creation_time": "",
+    "version": "2.0"
+  },
+  "parameters": {
+    "volume": 100,
+    "pan": 64
+  },
+  "notes": [
+    {
+      "pitch": 36,
+      "velocity": 117,
+      "start": 0.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 36,
+      "velocity": 65,
+      "start": 1.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 36,
+      "velocity": 67,
+      "start": 2.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 36,
+      "velocity": 87,
+      "start": 3.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 38,
+      "velocity": 78,
+      "start": 1.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 38,
+      "velocity": 87,
+      "start": 3.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 110,
+      "start": 0.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 117,
+      "start": 0.5,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 71,
+      "start": 1.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 79,
+      "start": 1.5,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 81,
+      "start": 2.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 87,
+      "start": 2.5,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 88,
+      "start": 3.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 66,
+      "start": 3.5,
+      "duration": 0.2
+    },
+    {
+      "pitch": 36,
+      "velocity": 98,
+      "start": 4.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 36,
+      "velocity": 66,
+      "start": 5.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 36,
+      "velocity": 85,
+      "start": 6.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 36,
+      "velocity": 72,
+      "start": 7.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 38,
+      "velocity": 79,
+      "start": 5.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 38,
+      "velocity": 78,
+      "start": 7.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 99,
+      "start": 4.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 114,
+      "start": 4.5,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 82,
+      "start": 5.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 60,
+      "start": 5.5,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 77,
+      "start": 6.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 75,
+      "start": 6.5,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 64,
+      "start": 7.0,
+      "duration": 0.2
+    },
+    {
+      "pitch": 42,
+      "velocity": 65,
+      "start": 7.5,
+      "duration": 0.2
+    }
+  ]
+}
